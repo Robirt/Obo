@@ -1,4 +1,4 @@
-import { CosmosClient, User } from '@azure/cosmos';
+import { CosmosClient, SqlQuerySpec, User } from '@azure/cosmos';
 import { UserEntity } from '../entities/user.entity';
 
 /**
@@ -36,6 +36,16 @@ export class UsersRepository {
     public async getUserByIdAsync(id: string): Promise<UserEntity | undefined> {
         const { resource: user } = await this.cosmosClient.database('Obo').container('Users').item(id).read<UserEntity>();
         return user;
+    }
+
+    /**
+     * Gets User by User Name.
+     * @param userName User Name.
+     * @returns User.
+     */
+    public async getUserByUserNameAsync(userName: string): Promise<UserEntity | undefined> {
+        const { resources: users } = await this.cosmosClient.database('Obo').container('Users').items.query<UserEntity>({ query: 'SELECT * FROM Users WHERE Users.userName = @userName', parameters: [{ name: '@userName', value: userName }] }).fetchAll();
+        return users[0];
     }
 
     /**

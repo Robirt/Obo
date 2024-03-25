@@ -1,12 +1,9 @@
 import { Application } from "./application";
-import { environment } from "./environment";
 
 /**
  * Program.
  */
 async function program(): Promise<void> {
-
-    if (!environment.production) process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
     try {
         const application: Application = new Application();
@@ -18,6 +15,10 @@ async function program(): Promise<void> {
         application.configureRouting();
         
         application.configureDatabase();
+
+        application.configureAuthentication();
+
+        application.configureAuthorization();
         
         application.run();
     }

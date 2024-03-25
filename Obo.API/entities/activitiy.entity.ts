@@ -1,5 +1,3 @@
-import { LocationEntity } from "./location.entity";
-
 /**
  * Activity Entity.
  */
@@ -16,8 +14,8 @@ export class ActivityEntity {
     public name: string = '';
 
     /**
-     * Locations.
+     * Description.
      */
-    public locations: Array<LocationEntity> = new Array<LocationEntity>();
+    public description: string = '';
 
 }

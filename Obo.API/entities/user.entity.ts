@@ -21,13 +21,23 @@ export class UserEntity {
     public email: string = '';
 
     /**
-     * Role Id.
+     * Hash.
      */
-    public roleId: string = '';
+    public hash: string = '';
+
+    /**
+     * Salt.
+     */
+    public salt: string = '';
 
     /**
      * Role.
      */
     public role: RoleEntity = new RoleEntity();
+
+    /**
+     * Role Id.
+     */
+    public roleId: string = '';
 
 }

@@ -3,9 +3,11 @@ import { CosmosClient } from "@azure/cosmos";
 import { environment } from "./environment";
 import { DependencyService } from "./dependency.service";
 import { UsersRepository } from "./repositories/users.repository";
+import { RolesRepository } from "./repositories/roles.repository";
 import { LocationsRepository } from "./repositories/locations.repository";
 import { ActivitiesRepository } from "./repositories/activities.repository";
 import { UsersService } from "./services/users.service";
+import { RolesService } from "./services/roles.service";
 import { LocationsService } from "./services/locations.service";
 import { ActivitiesService } from "./services/activities.service";
 import { UsersController } from "./controllers/users.controller";
@@ -26,7 +28,10 @@ export class Application {
      * Initializes a new instance of the {@link Application} class.
      */
     public constructor() {
+        if (!environment.production) process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
         this.express = express();
+        this.express.use(express.json());
     }
 
     /**
@@ -43,10 +48,12 @@ export class Application {
         DependencyService.addService(CosmosClient, new CosmosClient({ endpoint: environment.azureCosmosDB.endpoint, key: environment.azureCosmosDB.key }));
 
         DependencyService.addService(UsersRepository, new UsersRepository(DependencyService.getService(CosmosClient)));
+        DependencyService.addService(RolesRepository, new RolesRepository(DependencyService.getService(CosmosClient)));
         DependencyService.addService(LocationsRepository, new LocationsRepository(DependencyService.getService(CosmosClient)));
         DependencyService.addService(ActivitiesRepository, new ActivitiesRepository(DependencyService.getService(CosmosClient)));
 
-        DependencyService.addService(UsersService, new UsersService(DependencyService.getService(UsersRepository)));
+        DependencyService.addService(UsersService, new UsersService(DependencyService.getService(UsersRepository), DependencyService.getService(RolesRepository)));
+        DependencyService.addService(RolesService, new RolesService(DependencyService.getService(RolesRepository)));
         DependencyService.addService(LocationsService, new LocationsService(DependencyService.getService(LocationsRepository)));
         DependencyService.addService(ActivitiesService, new ActivitiesService(DependencyService.getService(ActivitiesRepository)));
     }
@@ -66,7 +73,8 @@ export class Application {
     public configureRouting(): void {
         this.express.get('/Users', async (request, response) => await DependencyService.getService(UsersController).getUsersAsync(request, response));
         this.express.get('/Users/:id', async (request, response) => await DependencyService.getService(UsersController).getUserByIdAsync(request, response));
-        this.express.post('/Users', async (request, response) => await DependencyService.getService(UsersController).createUserAsync(request, response));
+        this.express.post('/Users/SignUp', async (request, response) => await DependencyService.getService(UsersController).signUpAsync(request, response));
+        this.express.post('/Users/SignIn', async (request, response) => await DependencyService.getService(UsersController).signInAsync(request, response));
         this.express.put('/Users', async (request, response) => await DependencyService.getService(UsersController).updateUserAsync(request, response));
         this.express.delete('/Users/:id', async (request, response) => await DependencyService.getService(UsersController).deleteUserAsync(request, response));
 
@@ -83,6 +91,9 @@ export class Application {
         this.express.delete('/Activities/:id', async (request, response) => await DependencyService.getService(ActivitiesController).deleteActivityAsync(request, response));
     }
 
+    /**
+     * Configures Database.
+     */
     public async configureDatabase(): Promise<void> {
         const cosmosClient: CosmosClient = DependencyService.getService(CosmosClient);
 
@@ -97,8 +108,8 @@ export class Application {
         const { resources: roles } = await rolesContainer.items.readAll().fetchAll();
 
         if (roles.length === 0) {
-            await rolesContainer.items.create({ id: '1', name: 'Administrator' });
-            await rolesContainer.items.create({ id: '2', name: 'User' });
+            await rolesContainer.items.create({ name: 'Administrator' });
+            await rolesContainer.items.create({ name: 'User' });
         }
     }
 

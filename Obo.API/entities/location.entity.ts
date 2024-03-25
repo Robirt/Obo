@@ -1,5 +1,3 @@
-import { ActivityEntity } from "./activitiy.entity";
-
 /**
  * Location Entity.
  */
@@ -21,8 +19,18 @@ export class LocationEntity {
     public description: string = '';
 
     /**
-     * Activities.
+     * Latitude.
      */
-    public activities: Array<ActivityEntity> = new Array<ActivityEntity>();
+    public latitude: number = 0;
+
+    /**
+     * Longitude.
+     */
+    public longitude: number = 0;
+
+    /**
+     * Is Verified.
+     */
+    public isVerified: boolean = false;
 
 }

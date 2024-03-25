@@ -37,13 +37,33 @@ export class UsersController {
     }
 
     /**
-     * Creates User.
+     * Signs up User.
      * @param request Request.
      * @param response Response.
      */
-    public async createUserAsync(request: any, response: any): Promise<void> {
-        await this.usersService.createUserAsync(request.body);
-        response.sendStatus(201);
+    public async signUpAsync(request: any, response: any): Promise<void> {
+        try {
+            response.status(200).json(await this.usersService.signUpAsync(request.body));
+        }
+
+        catch (error: any) {
+            response.status(400).send(error.message);
+        }
+    }
+
+    /**
+     * Signs In User.
+     * @param request Request.
+     * @param response Response.
+     */
+    public async signInAsync(request: any, response: any): Promise<void> {
+        try {
+            response.status(200).json(await this.usersService.signInAsync(request.body));
+        }
+
+        catch (error: any) {
+            response.status(400).send(error.message);
+        }
     }
 
     /**
@@ -54,6 +74,22 @@ export class UsersController {
     public async updateUserAsync(request: any, response: any): Promise<void> {
         await this.usersService.updateUserAsync(request.body);
         response.sendStatus(204);
+    }
+
+    /**
+     * Updates User Password.
+     * @param request Request.
+     * @param response Response.
+     */
+    public async updateUserPasswordAsync(request: any, response: any): Promise<void> {
+        try {
+            await this.usersService.updateUserPasswordAsync(request.body);
+            response.sendStatus(204);
+        }
+
+        catch (error: any) {
+            response.status(400).send(error.message);
+        }
     }
 
     /**
